@@ -14,7 +14,7 @@
 .sidebar .brand-mark .mark{color:var(--brass)}
 .sidebar button,.sidebar a{border:0;background:transparent;color:var(--muted);text-align:left;padding:11px 12px;border-radius:9px;text-decoration:none;cursor:pointer;font-weight:600;font-size:14px;font-family:inherit}
 .sidebar button:hover,.sidebar a:hover{background:var(--panel-2);color:var(--paper)}
-.sidebar button.active{background:var(--brass);color:#1c1509}
+.sidebar button.active{background:var(--brass);color:#0b0d12}
 .sidebar a{margin-top:14px;border-top:1px solid var(--line);padding-top:18px;border-radius:0 0 9px 9px}
 .sidebar #logout{color:#e0a898}
 
