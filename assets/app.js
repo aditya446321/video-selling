@@ -16,7 +16,7 @@ function renderSettings() {
   if (!s) return;
   document.title = s.website_title || 'Video Selling';
   $('#pageTitle').textContent = s.website_title || 'Video Selling';
-  $('#brandName').textContent = '● ' + (s.store_name || 'Video Selling');
+  $('#brandText').textContent = s.store_name || 'Video Selling';
   $('#footerBrand').innerHTML = `© <span id="year">${new Date().getFullYear()}</span> ${esc(s.store_name || 'Video Selling')}`;
   $('#heroTitle').firstChild.textContent = (s.hero_title || 'Choose your access.') + ' ';
   $('#heroSubtitle').textContent = s.hero_subtitle || 'Pay in seconds.';
@@ -38,7 +38,7 @@ function renderPackages() {
   $('#empty').classList.toggle('hidden', packages.length > 0);
   $('#packagesGrid').innerHTML = packages.map(p => {
     const off = p.discount_percentage || 0;
-    return `<article class="card">${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ''}<small>${esc(p.name)}</small><h3>${esc(p.description || 'Digital access')}</h3><div class="price">${off ? `<span class="strike">${money(p.original_price)}</span>` : ''}${money(p.price)} ${off ? `<span class="off">${off}% OFF</span>` : ''}</div><ul>${(p.features || []).map(f => `<li>${esc(f)}</li>`).join('')}</ul><button class="btn light" onclick="openCheckout('package', ${p.id})">Buy Now</button></article>`;
+    return `<article class="card">${p.badge ? `<span class="badge">${esc(p.badge)}</span>` : ''}<div class="pass-head"><small class="pass-name">${esc(p.name)}</small><h3>${esc(p.description || 'Digital access')}</h3></div><ul>${(p.features || []).map(f => `<li>${esc(f)}</li>`).join('')}</ul><div class="perf" aria-hidden="true"></div><div class="stub"><div class="price">${off ? `<span class="strike">${money(p.original_price)}</span>` : ''}${money(p.price)}${off ? `<span class="off">${off}% OFF</span>` : ''}</div><button class="btn light full" onclick="openCheckout('package', ${p.id})">Buy Now</button></div></article>`;
   }).join('');
 }
 
@@ -47,7 +47,7 @@ function renderGroups() {
   $('#groupsEmpty').classList.toggle('hidden', groups.length > 0);
   $('#groupsList').innerHTML = groups.map(g => {
     const off = g.discount_percentage || 0;
-    return `<article class="card"><small>${esc(g.category || 'GROUP')}</small><h3>${esc(g.name)}</h3><p class="muted">${esc(g.description || '')}</p><div class="price">${off ? `<span class="strike">${money(g.original_price)}</span>` : ''}${g.price ? money(g.price) : ''} ${off ? `<span class="off">${off}% OFF</span>` : ''}</div>${g.link ? `<a class="btn ghost" href="${esc(g.link)}" target="_blank" rel="noopener noreferrer">Open Group</a>` : `<button class="btn light" onclick="openCheckout('group', ${g.id})">Buy Now</button>`}</article>`;
+    return `<article class="card"><div class="pass-head"><small class="pass-name">${esc(g.category || 'Group')}</small><h3>${esc(g.name)}</h3><p class="muted">${esc(g.description || '')}</p></div><div class="perf" aria-hidden="true"></div><div class="stub"><div class="price">${off ? `<span class="strike">${money(g.original_price)}</span>` : ''}${g.price ? money(g.price) : 'Free'}${off ? `<span class="off">${off}% OFF</span>` : ''}</div>${g.link ? `<a class="btn ghost full" href="${esc(g.link)}" target="_blank" rel="noopener noreferrer">Open Group</a>` : `<button class="btn light full" onclick="openCheckout('group', ${g.id})">Buy Now</button>`}</div></article>`;
   }).join('');
 }
 
