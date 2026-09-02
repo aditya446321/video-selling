@@ -257,18 +257,56 @@ $('#importBackup').onclick = async () => {
   }
 };
 
-// ---- auth ----
-$('#loginForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const msg = $('#loginMsg');
+// ---- auth (PIN keypad) ----
+const PIN_LENGTH = 4;
+let pinValue = '';
+
+function renderPinDots() {
+  document.querySelectorAll('#pinDots .dot').forEach((dot, i) => dot.classList.toggle('filled', i < pinValue.length));
+}
+
+async function submitPin() {
+  const errBox = $('#loginMsg');
+  errBox.classList.add('hidden');
   try {
-    await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: $('#password').value }) });
-    $('#password').value = '';
+    await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ password: pinValue }) });
+    pinValue = '';
     showApp();
   } catch (err) {
-    msg.className = 'message error'; msg.textContent = err.message || 'Invalid password.';
+    $('#loginMsgText').textContent = err.message || 'Incorrect PIN';
+    errBox.classList.remove('hidden');
+    pinValue = '';
+    renderPinDots();
   }
-};
+}
+
+$('#keypad').addEventListener('click', (e) => {
+  const key = e.target.closest('[data-key]');
+  if (key) {
+    if (pinValue.length >= PIN_LENGTH) return;
+    pinValue += key.dataset.key;
+    renderPinDots();
+    if (pinValue.length === PIN_LENGTH) submitPin();
+    return;
+  }
+  if (e.target.closest('#pinBack')) {
+    pinValue = pinValue.slice(0, -1);
+    renderPinDots();
+  }
+});
+
+document.addEventListener('keydown', (e) => {
+  if ($('#login').classList.contains('hidden')) return;
+  if (/^[0-9]$/.test(e.key) && pinValue.length < PIN_LENGTH) {
+    pinValue += e.key;
+    renderPinDots();
+    if (pinValue.length === PIN_LENGTH) submitPin();
+  } else if (e.key === 'Backspace') {
+    pinValue = pinValue.slice(0, -1);
+    renderPinDots();
+  }
+});
+
 $('#logout').onclick = async () => { await api('/api/admin/logout', { method: 'POST' }).catch(() => {}); showLogin(); };
 
 (async () => {
