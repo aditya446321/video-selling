@@ -1,11 +1,13 @@
 # Video Selling
 
 A digital video store with a public storefront and a private admin CMS, backed by a single
-persistent SQLite database. Anything changed in the admin panel — prices, packages, groups,
-offers, FAQ, UPI ID, Telegram/support details — is immediately reflected on the public site.
+persistent SQLite database (via [Turso](https://turso.tech) in production, a local file in
+development). Anything changed in the admin panel — prices, packages, groups, offers, FAQ, UPI
+ID, Telegram/support details — is immediately reflected on the public site, permanently.
 
-No Supabase, Firebase, or other external database service. No Docker, Redis, or extra
-frameworks. Just Express + SQLite.
+No Supabase, Firebase, Postgres, Docker, or Redis. Just Express + SQLite (via `@libsql/client`,
+which speaks plain SQL and works both as a local file and as a hosted Turso database with the
+same code).
 
 ## Architecture
 
@@ -56,27 +58,32 @@ Never commit `.env`, the generated `data/store.db`, or any real password/secret.
 
 ## Deployment
 
-### Any persistent Node host (recommended) — Render, Railway, Fly.io, a VPS, etc.
-Set the environment variables above in the host's dashboard, then run `npm install && npm start`.
-This is the recommended path: SQLite needs a writable, persistent disk, which these hosts provide.
+### Vercel (recommended — this is what fixes the "changes don't stick" bug)
+Plain Vercel + SQLite file does **not** persist — every serverless invocation can get a fresh,
+empty filesystem, so admin changes randomly appear and disappear. The fix: connect a free
+**Turso** database (serverless SQLite, built for exactly this) through Vercel's dashboard —
+no CLI, no terminal, works entirely from a phone browser:
 
-### Vercel
-`vercel.json` points to `api/index.js`, which serves the same Express app as a serverless
-function. **Important:** Vercel's filesystem is ephemeral and read-only outside `/tmp`, so the
-SQLite database will not reliably persist across deployments or cold starts there. Vercel works
-fine for trying the app out, but for real production data use a persistent Node host instead.
+1. Open your project on vercel.com → **Storage** tab → **Marketplace** (or **Create Database**)
+2. Choose **Turso** → **Connect** — Vercel creates a free database and automatically adds
+   `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to your project's environment variables
+3. Redeploy (Vercel usually does this automatically after connecting)
 
-### Netlify
-Netlify's function runtime has the same ephemeral-filesystem limitation as Vercel, so it isn't a
-good fit for a SQLite-backed app either. If you want to use Netlify, point it at a persistent
-Node host running the API (via a redirect/proxy) rather than running the database inside a
-Netlify Function.
+That's it — no code changes needed, the app already checks for `TURSO_DATABASE_URL` and uses it
+automatically when present. Turso's free tier (as of writing) covers far more traffic than a
+small store needs.
+
+### Any persistent Node host — Render, Railway, Fly.io, a VPS, etc.
+Set `ADMIN_PASSWORD_HASH` and `SESSION_SECRET`, then `npm install && npm start`. Without a
+`TURSO_DATABASE_URL` set, the app uses a local SQLite file on that host's disk — fine as long as
+the host's disk is persistent (most traditional Node hosts are; check before relying on it).
 
 ### Local development
 ```bash
 npm install
 npm run dev
 ```
+No Turso account needed locally — it automatically uses a SQLite file at `data/store.db`.
 
 ## Backup & restore
 
