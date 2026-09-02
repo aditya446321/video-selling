@@ -3,6 +3,7 @@ import helmet from 'helmet';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
+import { ready } from './db.js';
 import { publicRouter } from './routes/public.js';
 import { adminRouter } from './routes/admin.js';
 
@@ -39,6 +40,13 @@ app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json({ limit: '1mb' }));
 
 app.get('/health', (req, res) => res.json({ ok: true }));
+
+// Ensure the database schema/seed is ready before any request is handled.
+// On serverless platforms this resolves once per cold start and is cached
+// for subsequent requests on the same warm instance.
+app.use(async (req, res, next) => {
+  try { await ready(); next(); } catch (err) { next(err); }
+});
 
 app.use('/api/admin', adminRouter);
 app.use('/api', publicRouter);
