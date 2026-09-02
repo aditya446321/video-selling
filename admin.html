@@ -1,14 +1,25 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Admin Dashboard — Video Selling</title><link rel="icon" href="/assets/favicon.svg"><link rel="stylesheet" href="/assets/style.css"><link rel="stylesheet" href="/assets/admin.css"></head><body>
 <div id="login" class="admin-login">
-  <div class="admin-panel">
-    <b class="brand-mark"><span class="mark">●</span> Video Selling</b>
-    <h1>Admin Panel</h1>
-    <p class="muted">Sign in with the admin password to manage the store.</p>
-    <form id="loginForm">
-      <label>Admin Password<input id="password" type="password" autocomplete="current-password" required></label>
-      <button class="btn light full">Sign in</button>
-    </form>
-    <div id="loginMsg" class="message hidden"></div>
+  <div class="pin-shell">
+    <div class="pin-icon" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2 4 5v6c0 5 3.4 8.7 8 10 4.6-1.3 8-5 8-10V5l-8-3Z"/><circle cx="12" cy="11" r="2.3"/><path d="M12 13.3V16"/></svg>
+    </div>
+    <h1>Video Selling Admin</h1>
+    <p class="muted">Enter admin PIN to access dashboard</p>
+    <div class="pin-panel">
+      <div class="pin-dots" id="pinDots">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div id="loginMsg" class="pin-error hidden"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span id="loginMsgText">Incorrect PIN</span></div>
+      <div class="keypad" id="keypad">
+        <button type="button" data-key="1">1</button><button type="button" data-key="2">2</button><button type="button" data-key="3">3</button>
+        <button type="button" data-key="4">4</button><button type="button" data-key="5">5</button><button type="button" data-key="6">6</button>
+        <button type="button" data-key="7">7</button><button type="button" data-key="8">8</button><button type="button" data-key="9">9</button>
+        <span></span><button type="button" data-key="0">0</button>
+        <button type="button" id="pinBack" aria-label="Delete"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H20a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H9l-6-7 6-7Z"/><path d="M13 10l4 4M17 10l-4 4"/></svg></button>
+      </div>
+      <a class="pin-back" href="/">← Return to Store</a>
+    </div>
   </div>
 </div>
 
