@@ -2,6 +2,32 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const money = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
 
+const ICONS = {
+  grid: '<path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"/>',
+  box: '<path d="M21 8 12 3 3 8v8l9 5 9-5Z"/><path d="M3 8l9 5 9-5M12 13v8"/>',
+  users: '<circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><circle cx="17.5" cy="9" r="2.4"/><path d="M15.5 14.3c2.7.4 4.5 2.4 4.5 5.7"/>',
+  tag: '<path d="M20 12.5 12.5 20 4 11.5V4h7.5Z"/><circle cx="8" cy="8" r="1.4"/>',
+  receipt: '<path d="M6 3h12v18l-2.5-1.6L13 21l-2.5-1.6L8 21l-2-1.6Z"/><path d="M9 8h6M9 12h6"/>',
+  help: '<circle cx="12" cy="12" r="9"/><path d="M9.5 9.3a2.5 2.5 0 1 1 3.6 2.3c-.9.5-1.1 1-1.1 2M12 17h.01"/>',
+  sliders: '<path d="M4 6h9M17 6h3M4 12h3M9 12h11M4 18h13M19 18h1"/><circle cx="13" cy="6" r="2"/><circle cx="7" cy="12" r="2"/><circle cx="17" cy="18" r="2"/>',
+  cloud: '<path d="M7 18a4.5 4.5 0 0 1-.5-9 5.5 5.5 0 0 1 10.7-1.6A4 4 0 0 1 17 18Z"/>',
+  external: '<path d="M14 4h6v6M10 14 20 4M19 13v6a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6"/>',
+  logout: '<path d="M9 21H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h4M16 17l4-5-4-5M20 12H9"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/>',
+  check: '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.5 2.5L16 9.5"/>',
+  wallet: '<path d="M3 7.5A1.5 1.5 0 0 1 4.5 6h13A1.5 1.5 0 0 1 19 7.5v9A1.5 1.5 0 0 1 17.5 18h-13A1.5 1.5 0 0 1 3 16.5Z"/><path d="M15.5 12h2M15 12a1.2 1.2 0 1 0 0-.01"/>',
+  inbox: '<path d="M4 12h4l2 3h4l2-3h4"/><path d="M5.5 5h13l2 7v6a1 1 0 0 1-1 1H4.5a1 1 0 0 1-1-1v-6Z"/>'
+};
+function icon(name, size = 18) { return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${ICONS[name] || ''}</svg>`; }
+function emptyState(iconName, title, sub) {
+  return `<div class="empty-state">${icon(iconName, 26)}<b>${esc(title)}</b><p class="muted">${esc(sub)}</p></div>`;
+}
+
+// hydrate sidebar icons (kept out of the HTML to keep markup light)
+document.querySelectorAll('[data-icon]').forEach(el => {
+  el.insertAdjacentHTML('afterbegin', `<span class="nav-icon">${icon(el.dataset.icon, 17)}</span>`);
+});
+
 async function api(path, options = {}) {
   const res = await fetch(path, {
     ...options,
@@ -57,20 +83,24 @@ function openEditor(title, fields, submit) {
 // ---- dashboard ----
 async function loadStats() {
   const s = await api('/api/admin/dashboard');
-  $('#stats').innerHTML = `
-    <div class="stat"><span class="muted">Packages</span><strong>${s.packages}</strong></div>
-    <div class="stat"><span class="muted">Groups</span><strong>${s.groups}</strong></div>
-    <div class="stat"><span class="muted">Active Offers</span><strong>${s.offers}</strong></div>
-    <div class="stat"><span class="muted">Orders</span><strong>${s.totalOrders}</strong></div>
-    <div class="stat"><span class="muted">Pending Orders</span><strong>${s.pendingOrders}</strong></div>
-    <div class="stat"><span class="muted">Approved Orders</span><strong>${s.approvedOrders}</strong></div>
-    <div class="stat"><span class="muted">Revenue (Approved)</span><strong>${money(s.revenue)}</strong></div>`;
+  const cards = [
+    ['box', 'Packages', s.packages],
+    ['users', 'Groups', s.groups],
+    ['tag', 'Active Offers', s.offers],
+    ['receipt', 'Orders', s.totalOrders],
+    ['clock', 'Pending Orders', s.pendingOrders],
+    ['check', 'Approved Orders', s.approvedOrders],
+    ['wallet', 'Revenue (Approved)', money(s.revenue)]
+  ];
+  $('#stats').innerHTML = cards.map(([ic, label, value]) =>
+    `<div class="stat"><div class="stat-icon">${icon(ic, 17)}</div><span class="muted">${label}</span><strong>${value}</strong></div>`
+  ).join('');
 }
 
 // ---- packages ----
 async function loadPackages() {
   const list = await api('/api/admin/packages');
-  $('#packageAdmin').innerHTML = list.length ? list.map(p => `<div class="admin-row"><b>${esc(p.name)}</b><div>${money(p.price)} ${p.original_price > p.price ? `· <span class="strike">${money(p.original_price)}</span>` : ''} · ${p.active ? 'Active' : 'Hidden'}</div><p class="muted">${esc(p.description)}</p><div class="actions"><button class="small-btn" onclick='editPackage(${JSON.stringify(p)})'>Edit</button><button class="small-btn" onclick="togglePackage(${p.id})">${p.active ? 'Hide' : 'Show'}</button><button class="small-btn danger" onclick="deletePackage(${p.id})">Delete</button></div></div>`).join('') : '<div class="admin-panel">No packages yet. Add your first package.</div>';
+  $('#packageAdmin').innerHTML = list.length ? list.map(p => `<div class="admin-row"><span class="status-dot ${p.active ? 'on' : 'off'}"></span><div class="row-main"><b>${esc(p.name)}</b><p class="muted">${esc(p.description)}</p></div><div class="row-price">${money(p.price)}${p.original_price > p.price ? `<span class="strike">${money(p.original_price)}</span>` : ''}</div><div class="actions"><button class="small-btn" onclick='editPackage(${JSON.stringify(p)})'>${icon('sliders', 14)}Edit</button><button class="small-btn" onclick="togglePackage(${p.id})">${p.active ? 'Hide' : 'Show'}</button><button class="small-btn danger" onclick="deletePackage(${p.id})">Delete</button></div></div>`).join('') : emptyState('box', 'No packages yet', 'Add your first package to start selling access.');
 }
 function packageFields(p = {}) {
   return [
@@ -111,7 +141,7 @@ window.deletePackage = async (id) => {
 // ---- groups ----
 async function loadGroups() {
   const list = await api('/api/admin/groups');
-  $('#groupAdmin').innerHTML = list.length ? list.map(g => `<div class="admin-row"><b>${esc(g.name)}</b><div>${money(g.price)} · ${g.active ? 'Active' : 'Hidden'}</div><p class="muted">${esc(g.description)}</p><div class="actions"><button class="small-btn" onclick='editGroup(${JSON.stringify(g)})'>Edit</button><button class="small-btn" onclick="toggleGroup(${g.id})">${g.active ? 'Hide' : 'Show'}</button><button class="small-btn danger" onclick="deleteGroup(${g.id})">Delete</button></div></div>`).join('') : '<div class="admin-panel">No groups yet. Add your first group.</div>';
+  $('#groupAdmin').innerHTML = list.length ? list.map(g => `<div class="admin-row"><span class="status-dot ${g.active ? 'on' : 'off'}"></span><div class="row-main"><b>${esc(g.name)}</b><p class="muted">${esc(g.description)}</p></div><div class="row-price">${money(g.price)}</div><div class="actions"><button class="small-btn" onclick='editGroup(${JSON.stringify(g)})'>${icon('sliders', 14)}Edit</button><button class="small-btn" onclick="toggleGroup(${g.id})">${g.active ? 'Hide' : 'Show'}</button><button class="small-btn danger" onclick="deleteGroup(${g.id})">Delete</button></div></div>`).join('') : emptyState('users', 'No groups yet', 'Add your first group to link a community.');
 }
 function groupFields(g = {}) {
   return [
@@ -154,7 +184,7 @@ async function loadOffers() {
   const [offers, packages, groups] = await Promise.all([api('/api/admin/offers'), api('/api/admin/packages'), api('/api/admin/groups')]);
   cachedPackages = packages; cachedGroups = groups;
   const nameFor = (o) => (o.product_type === 'package' ? packages : groups).find(x => x.id === o.product_id)?.name || 'Deleted item';
-  $('#offerAdmin').innerHTML = offers.length ? offers.map(o => `<div class="admin-row"><b>${esc(o.title)}</b> · ${esc(nameFor(o))} (${o.product_type})<div><span class="strike">${money(o.original_price)}</span> <strong>${money(o.sale_price)}</strong> · ${o.active ? 'Active' : 'Inactive'}</div><div class="actions"><button class="small-btn" onclick='editOffer(${JSON.stringify(o)})'>Edit</button><button class="small-btn danger" onclick="deleteOffer(${o.id})">Delete</button></div></div>`).join('') : '<div class="admin-panel">No active offers. Add your first offer.</div>';
+  $('#offerAdmin').innerHTML = offers.length ? offers.map(o => `<div class="admin-row"><span class="status-dot ${o.active ? 'on' : 'off'}"></span><div class="row-main"><b>${esc(o.title)}</b><p class="muted">${esc(nameFor(o))} · ${o.product_type}</p></div><div class="row-price">${money(o.sale_price)}<span class="strike">${money(o.original_price)}</span></div><div class="actions"><button class="small-btn" onclick='editOffer(${JSON.stringify(o)})'>${icon('sliders', 14)}Edit</button><button class="small-btn danger" onclick="deleteOffer(${o.id})">Delete</button></div></div>`).join('') : emptyState('tag', 'No active offers', 'Add a time-boxed discount on a package or group.');
 }
 function offerFields(o = {}) {
   const productOptions = [
@@ -194,7 +224,7 @@ async function loadOrders() {
     status: $('#orderStatus').value, search: $('#orderSearch').value, sort: $('#orderSort').value
   });
   const list = await api('/api/admin/orders?' + params.toString());
-  $('#orderAdmin').innerHTML = list.length ? list.map(o => `<div class="admin-row"><b>${esc(o.product_name)}</b> · ${money(o.amount)} <span class="status ${esc(o.status)}">${esc(o.status)}</span><p>${esc(o.customer_name)} · ${esc(o.customer_contact)}</p><p class="muted">Order: ${esc(o.order_id)}${o.payment_reference ? ' · Ref: ' + esc(o.payment_reference) : ''} · ${esc(o.created_at)}</p><div class="actions"><button class="small-btn" onclick="setOrder('${o.order_id}','approved')">Approve</button><button class="small-btn" onclick="setOrder('${o.order_id}','rejected')">Reject</button><button class="small-btn" onclick="setOrder('${o.order_id}','pending')">Pending</button></div></div>`).join('') : '<div class="admin-panel">No orders yet.</div>';
+  $('#orderAdmin').innerHTML = list.length ? list.map(o => `<div class="admin-row order-row"><div class="row-main"><b>${esc(o.product_name)} <span class="status ${esc(o.status)}">${esc(o.status)}</span></b><p>${esc(o.customer_name)} · ${esc(o.customer_contact)}</p><p class="muted">${esc(o.order_id)}${o.payment_reference ? ' · Ref: ' + esc(o.payment_reference) : ''} · ${esc(o.created_at)}</p></div><div class="row-price">${money(o.amount)}</div><div class="actions"><button class="small-btn" onclick="setOrder('${o.order_id}','approved')">Approve</button><button class="small-btn" onclick="setOrder('${o.order_id}','rejected')">Reject</button><button class="small-btn" onclick="setOrder('${o.order_id}','pending')">Pending</button></div></div>`).join('') : emptyState('inbox', 'No orders yet', 'Customer payment confirmations will show up here.');
 }
 window.setOrder = async (id, status) => { await api(`/api/admin/orders/${id}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }); loadOrders(); loadStats(); };
 $('#orderSearch').oninput = debounce(loadOrders, 300);
@@ -205,7 +235,7 @@ function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTi
 // ---- faq ----
 async function loadFaq() {
   const list = await api('/api/admin/faq');
-  $('#faqAdmin').innerHTML = list.length ? list.map(f => `<div class="admin-row"><b>${esc(f.question)}</b><p class="muted">${esc(f.answer)}</p><div>${f.active ? 'Active' : 'Hidden'} · Order ${f.display_order}</div><div class="actions"><button class="small-btn" onclick='editFaq(${JSON.stringify(f)})'>Edit</button><button class="small-btn danger" onclick="deleteFaq(${f.id})">Delete</button></div></div>`).join('') : '<div class="admin-panel">No FAQ entries yet.</div>';
+  $('#faqAdmin').innerHTML = list.length ? list.map(f => `<div class="admin-row"><span class="status-dot ${f.active ? 'on' : 'off'}"></span><div class="row-main"><b>${esc(f.question)}</b><p class="muted">${esc(f.answer)}</p></div><div class="actions"><button class="small-btn" onclick='editFaq(${JSON.stringify(f)})'>${icon('sliders', 14)}Edit</button><button class="small-btn danger" onclick="deleteFaq(${f.id})">Delete</button></div></div>`).join('') : emptyState('help', 'No FAQ entries yet', 'Add answers to common pre-purchase questions.');
 }
 function faqFields(f = {}) {
   return [
