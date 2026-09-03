@@ -26,42 +26,61 @@
 <div id="app" class="hidden">
   <aside class="sidebar">
     <b class="brand-mark"><span class="mark">●</span> Video Selling</b>
-    <button data-tab="dashboard">Dashboard</button>
-    <button data-tab="packages">Packages</button>
-    <button data-tab="groups">Groups</button>
-    <button data-tab="offers">Offers</button>
-    <button data-tab="orders">Orders</button>
-    <button data-tab="faq">FAQ</button>
-    <button data-tab="settings">Website &amp; Support</button>
-    <button data-tab="backup">Backup</button>
-    <a href="/" target="_blank" rel="noopener">View Store ↗</a>
-    <button id="logout">Log out</button>
+    <div class="nav-group">
+      <span class="nav-label">Overview</span>
+      <button data-tab="dashboard" data-icon="grid">Dashboard</button>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Catalog</span>
+      <button data-tab="packages" data-icon="box">Packages</button>
+      <button data-tab="groups" data-icon="users">Groups</button>
+      <button data-tab="offers" data-icon="tag">Offers</button>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Sales</span>
+      <button data-tab="orders" data-icon="receipt">Orders</button>
+    </div>
+    <div class="nav-group">
+      <span class="nav-label">Content</span>
+      <button data-tab="faq" data-icon="help">FAQ</button>
+      <button data-tab="settings" data-icon="sliders">Website &amp; Support</button>
+      <button data-tab="backup" data-icon="cloud">Backup</button>
+    </div>
+    <div class="sidebar-foot">
+      <a href="/" target="_blank" rel="noopener" data-icon="external">View Store</a>
+      <button id="logout" data-icon="logout">Log out</button>
+    </div>
   </aside>
 
   <main class="admin-main">
     <section data-page="dashboard">
-      <div class="top"><div><h1>Dashboard</h1></div></div>
+      <div class="top"><div><h1>Dashboard</h1><p class="muted page-sub">A snapshot of your store, live from the database.</p></div></div>
       <div id="stats" class="stats"></div>
-      <div class="admin-panel"><h2>Live control center</h2><p class="muted">Everything here is stored server-side in SQLite. Changes made in this panel are immediately reflected on the public website.</p></div>
+      <div class="admin-panel info-panel">
+        <div class="info-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v.01M12 11v5"/></svg>
+        </div>
+        <div><h2>Live control center</h2><p class="muted">Everything here is stored server-side. Changes made in this panel are immediately reflected on the public website — no publish step needed.</p></div>
+      </div>
     </section>
 
     <section data-page="packages" class="hidden">
-      <div class="top"><h1>Packages</h1><button class="btn light" id="newPackage">+ Add Package</button></div>
+      <div class="top"><div><h1>Packages</h1><p class="muted page-sub">Access tiers customers can purchase.</p></div><button class="btn light" id="newPackage">+ Add Package</button></div>
       <div id="packageAdmin"></div>
     </section>
 
     <section data-page="groups" class="hidden">
-      <div class="top"><h1>Groups</h1><button class="btn light" id="newGroup">+ Add Group</button></div>
+      <div class="top"><div><h1>Groups</h1><p class="muted page-sub">Community groups and linked resources.</p></div><button class="btn light" id="newGroup">+ Add Group</button></div>
       <div id="groupAdmin"></div>
     </section>
 
     <section data-page="offers" class="hidden">
-      <div class="top"><h1>Special Offers</h1><button class="btn light" id="newOffer">+ Add Offer</button></div>
+      <div class="top"><div><h1>Special Offers</h1><p class="muted page-sub">Time-boxed discounts on packages or groups.</p></div><button class="btn light" id="newOffer">+ Add Offer</button></div>
       <div id="offerAdmin"></div>
     </section>
 
     <section data-page="orders" class="hidden">
-      <div class="top"><h1>Orders</h1></div>
+      <div class="top"><div><h1>Orders</h1><p class="muted page-sub">Payment confirmations submitted by customers.</p></div></div>
       <div class="order-filters">
         <input id="orderSearch" placeholder="Search name, contact, order ID…">
         <select id="orderStatus"><option value="all">All statuses</option><option value="pending">Pending</option><option value="paid">Paid</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="cancelled">Cancelled</option></select>
@@ -71,12 +90,12 @@
     </section>
 
     <section data-page="faq" class="hidden">
-      <div class="top"><h1>FAQ</h1><button class="btn light" id="newFaq">+ Add FAQ</button></div>
+      <div class="top"><div><h1>FAQ</h1><p class="muted page-sub">Shown to customers before checkout.</p></div><button class="btn light" id="newFaq">+ Add FAQ</button></div>
       <div id="faqAdmin"></div>
     </section>
 
     <section data-page="settings" class="hidden">
-      <div class="top"><h1>Website &amp; Support</h1></div>
+      <div class="top"><div><h1>Website &amp; Support</h1><p class="muted page-sub">Store identity, UPI details, and support contacts.</p></div></div>
       <form id="settingsForm" class="admin-panel form-grid">
         <label>Store Name<input name="store_name"></label>
         <label>Website Title<input name="website_title"></label>
@@ -99,18 +118,14 @@
     </section>
 
     <section data-page="backup" class="hidden">
-      <div class="top"><h1>Backup</h1></div>
-      <div class="admin-panel">
-        <h2>Export</h2>
-        <p class="muted">Download a full JSON backup of packages, groups, offers, FAQ, orders and settings.</p>
-        <button class="btn light" id="exportBackup">Download Backup</button>
+      <div class="top"><div><h1>Backup</h1><p class="muted page-sub">Export or restore your full store data.</p></div></div>
+      <div class="admin-panel backup-card">
+        <div class="info-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2"/></svg></div>
+        <div class="backup-body"><h2>Export</h2><p class="muted">Download a full JSON backup of packages, groups, offers, FAQ, orders and settings.</p><button class="btn light" id="exportBackup">Download Backup</button></div>
       </div>
-      <div class="admin-panel">
-        <h2>Import</h2>
-        <p class="muted">Importing replaces existing packages, groups, offers and FAQ with the file's contents. This cannot be undone.</p>
-        <input type="file" id="importFile" accept="application/json">
-        <button class="btn light" id="importBackup">Import Backup</button>
-        <div id="backupMsg" class="message hidden"></div>
+      <div class="admin-panel backup-card">
+        <div class="info-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 21V9m0 0-4 4m4-4 4 4"/><path d="M5 3v2a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3"/></svg></div>
+        <div class="backup-body"><h2>Import</h2><p class="muted">Importing replaces existing packages, groups, offers and FAQ with the file's contents. This cannot be undone.</p><input type="file" id="importFile" accept="application/json"><button class="btn light" id="importBackup">Import Backup</button><div id="backupMsg" class="message hidden"></div></div>
       </div>
     </section>
   </main>
